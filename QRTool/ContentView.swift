@@ -15,23 +15,37 @@ struct ContentView: View {
         NavigationStack {
             List {
                 Section {
-                    HStack {
-                        Image(systemName: keySet ? "key.fill" : "key.slash")
-                            .foregroundColor(keySet ? .green : .red)
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill((keySet ? Color.green : Color.red).opacity(0.15))
+                                .frame(width: 36, height: 36)
+                            Image(systemName: keySet ? "key.fill" : "key.slash")
+                                .foregroundColor(keySet ? .green : .red)
+                        }
                         Text(keySet ? "密钥已保存" : "未设置密钥，先去设置里输入密钥")
+                            .font(.headline)
                         Spacer()
                         Button("设置") { showSettings = true }
                     }
+                    .padding(.vertical, 4)
                 }
                 Section("粘贴密文（每行一条）") {
                     TextEditor(text: $pastedText)
                         .frame(minHeight: 120)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.white)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
+                } footer: {
+                    Text("解密全部在手机本地完成，不联网。")
                 }
                 Section {
                     Button("选择文件（可多选 .txt）") { showPicker = true }
                     Button(isWorking ? "正在处理…" : "解密并生成二维码") { processPasted() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .frame(maxWidth: .infinity)
                         .disabled(!keySet || isWorking)
                     if !results.isEmpty {
                         Button("清空结果", role: .destructive) {
@@ -44,18 +58,28 @@ struct ContentView: View {
                     Section("结果（每个文档一张合集图）") {
                         ForEach(results) { result in
                             NavigationLink(destination: DetailView(result: result, collage: collages[result.id])) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(result.name).font(.headline)
-                                    Text("\(result.urls.count) 条链接" + (result.failedLines > 0 ? "，\(result.failedLines) 行解密失败" : ""))
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                HStack(spacing: 12) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color.blue.opacity(0.12))
+                                            .frame(width: 36, height: 36)
+                                        Image(systemName: "qrcode")
+                                            .foregroundColor(.blue)
+                                    }
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(result.name).font(.headline)
+                                        Text("\(result.urls.count) 条链接" + (result.failedLines > 0 ? "，\(result.failedLines) 行解密失败" : ""))
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
+                                .padding(.vertical, 4)
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("二维码工具")
+            .navigationTitle("扫码助手")
             .sheet(isPresented: $showPicker) {
                 DocumentPicker { urls in processFiles(urls) }
             }
@@ -126,6 +150,8 @@ struct DetailView: View {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
+                        .cornerRadius(12)
+                        .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 2)
                         .padding(.horizontal)
                 } else {
                     Text("没有可生成的二维码").foregroundColor(.secondary)
@@ -213,6 +239,11 @@ struct SettingsView: View {
                     if let msg = message {
                         Text(msg).font(.footnote).foregroundColor(.green)
                     }
+                }
+                Section {
+                    Text("扫码助手 v1.0.0")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
             }
             .navigationTitle("设置")
