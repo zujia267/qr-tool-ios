@@ -1,0 +1,40 @@
+name: Build IPA
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build unsigned archive
+        run: |
+          xcodebuild -project QRTool.xcodeproj \
+            -scheme QRTool \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/QRTool.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/QRTool.xcarchive/Products/Applications/QRTool.app Payload/
+          zip -r QRTool.ipa Payload
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: 二维码工具 v1.0.0
+          body: 未签名 IPA，需用 AltStore / SideStore 自签安装。首次打开请先在设置里输入 16 位密钥。
+          files: QRTool.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
