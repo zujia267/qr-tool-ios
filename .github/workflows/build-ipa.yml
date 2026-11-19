@@ -19,14 +19,14 @@ jobs:
             -target QRTool \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath build/QRTool.xcarchive \
+            SYMROOT=build \
             CODE_SIGNING_ALLOWED=NO \
-            archive
+            build
 
       - name: Package IPA
         run: |
           mkdir -p Payload
-          cp -r build/QRTool.xcarchive/Products/Applications/QRTool.app Payload/
+          cp -r build/Release-iphones/QRtool.apppayload/
           zip -r QRTool.ipa Payload
 
       - name: Publish release
