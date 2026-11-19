@@ -30,13 +30,15 @@ struct ContentView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                Section("粘贴密文（每行一条）") {
+                Section {
                     TextEditor(text: $pastedText)
                         .frame(minHeight: 120)
                         .scrollContentBackground(.hidden)
                         .background(Color.white)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
+                } header: {
+                    Text("粘贴密文（每行一条）")
                 } footer: {
                     Text("解密全部在手机本地完成，不联网。")
                 }
