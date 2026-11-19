@@ -26,7 +26,7 @@ jobs:
       - name: Package IPA
         run: |
           mkdir -p Payload
-          cp -r build/Release-iphones/QRtool.apppayload/
+          cp -r build/Release-iphoneos/QRTool.app payload/
           zip -r QRTool.ipa Payload
 
       - name: Publish release
